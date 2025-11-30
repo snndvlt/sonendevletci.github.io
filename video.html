@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yayın</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:20px; background:#f9f9f9; }
+  .container { max-width:800px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
+  h1 { margin-top:0; }
+  .meta { font-size:12px; color:#666; margin-bottom:10px; }
+  video { max-width:100%; border-radius:8px; margin-bottom:15px; }
+  button { padding:8px 12px; margin-top:10px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="container">
+  <button onclick="goBack()">← Geri</button>
+  <h1 id="videoTitle">Yayın Başlığı</h1>
+  <div class="meta" id="videoDate">Tarih</div>
+  <video id="videoPlayer" controls></video>
+  <div id="videoDesc"></div>
+  <div id="adminEdit" style="margin-top:15px; display:none">
+    <button onclick="editVideo()">Videoyu Düzenle</button>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const videoId = params.get('id');
+let state = JSON.parse(localStorage.getItem('blog_state') || '{}');
+let isAdmin = localStorage.getItem('admin')==='1';
+
+function goBack(){ window.history.back(); }
+
+function editVideo(){
+  const v = state.videos.find(x=>x.id===videoId);
+  if(!v){ alert('Video bulunamadı'); return; }
+  localStorage.setItem('editVideo', JSON.stringify(v));
+  window.location.href='admin-dashboard.html';
+}
+
+function renderVideo(){
+  if(!state.videos) return;
+  const v = state.videos.find(x=>x.id===videoId);
+  if(!v){ document.getElementById('videoDesc').innerHTML='Video bulunamadı'; return; }
+
+  document.getElementById('videoTitle').textContent = v.title || v.name;
+  document.getElementById('videoDate').textContent = new Date(v.date).toLocaleString();
+  document.getElementById('videoPlayer').src = v.data;
+  document.getElementById('videoDesc').innerHTML = v.description || '';
+
+  if(isAdmin) document.getElementById('adminEdit').style.display='block';
+}
+
+renderVideo();
+</script>
+</body>
+</html>
