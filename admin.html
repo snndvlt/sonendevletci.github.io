@@ -1,33 +1,88 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Yönetici Paneli</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    .box { max-width: 400px; margin: auto; border: 1px solid #ccc; padding: 20px; border-radius: 10px; }
-    input { width: 100%; padding: 10px; margin-top: 10px; }
-    button { padding: 10px 20px; margin-top: 15px; width: 100%; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yönetici Paneli</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:20px; background:#f9f9f9; }
+  .container { max-width:900px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
+  h1,h2,h3 { margin-top:0; }
+  .card { padding:15px; margin-bottom:12px; border:1px solid #ddd; border-radius:8px; background:#fff; }
+  textarea, input { width:100%; padding:8px; margin-bottom:8px; }
+  button { padding:8px 12px; cursor:pointer; margin-right:5px; }
+  .posts-list div { margin-bottom:8px; }
+</style>
 </head>
 <body>
-  <div class="box">
-    <h2>Yönetici Girişi</h2>
-    <input id="adminPass" type="password" placeholder="Parola" />
-    <button onclick="loginAdmin()">Giriş Yap</button>
+<div class="container">
+  <h1>Yönetici Paneli</h1>
+
+  <div class="card">
+    <h2>Site Bilgileri</h2>
+    <label>Hakkında Metni</label>
+    <textarea id="aboutInput"></textarea>
+    <label>Kapak Fotoğrafı (jpg/png)</label>
+    <input type="file" id="coverUpload" accept="image/*">
+    <button id="saveSiteMeta">Kaydet</button>
   </div>
 
+  <div class="card">
+    <h2>Yeni Yazı</h2>
+    <input id="postTitle" placeholder="Başlık">
+    <input id="postExcerpt" placeholder="Kısa özet (liste için)">
+    <label>Kapak (isteğe bağlı)</label>
+    <input type="file" id="postCover" accept="image/*">
+    <label>İçerik (HTML veya markdown desteklenir)</label>
+    <textarea id="postBody"></textarea>
+    <div>
+      <button id="publishPost">Yayınla</button>
+      <button id="saveDraft">Taslak Kaydet</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Dosya/Yayın Yükle</h2>
+    <label>Dosya (pdf, docx, md)</label>
+    <input type="file" id="fileUpload">
+    <button id="uploadFileBtn">Upload ve Yazı Olarak Ekle</button>
+    <hr>
+    <label>Video Yükle</label>
+    <input type="file" id="videoUpload" accept="video/*">
+    <button id="uploadVideoBtn">Video Yükle</button>
+  </div>
+
+  <div class="card">
+    <h2>Mevcut İçerikler</h2>
+    <div id="adminList" class="posts-list"></div>
+  </div>
+</div>
+
 <script>
-function loginAdmin() {
-  const pass = document.getElementById('adminPass').value;
-  if (pass === 'admin123') {
-    localStorage.setItem('admin', '1');
-    window.location.href = 'admin-dashboard.html';
-  } else {
-    alert('Hatalı parola');
-  }
+let state = JSON.parse(localStorage.getItem('blog_state')||'{}');
+let isAdmin = true;
+localStorage.setItem('admin','1');
+
+function fileToDataURL(file){ return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(file);});}
+
+function saveSiteMeta(){
+  state.siteMeta.about = document.getElementById('aboutInput').value;
+  const f = document.getElementById('coverUpload').files[0];
+  if(f){ fileToDataURL(f).then(data=>{ state.siteMeta.cover=data; localStorage.setItem('blog_state',JSON.stringify(state)); alert('Kaydedildi'); });}
 }
+
+document.getElementById('saveSiteMeta').onclick = saveSiteMeta;
+
+function renderAdminList(){
+  const el = document.getElementById('adminList'); el.innerHTML='';
+  state.posts.concat(state.videos).sort((a,b)=> (b.date||'').localeCompare(a.date||'')).forEach(item=>{
+    const div = document.createElement('div');
+    div.textContent = item.title||item.name;
+    el.appendChild(div);
+  });
+}
+
+renderAdminList();
 </script>
 </body>
 </html>
