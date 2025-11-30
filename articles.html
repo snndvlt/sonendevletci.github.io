@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yazılar</title>
+  <style>
+    body { font-family: Arial; margin:0; padding:20px; }
+    .topbar { display:flex; justify-content:space-between; margin-bottom:20px; }
+    .card { border:1px solid #ccc; padding:10px; margin-bottom:10px; cursor:pointer; }
+    button { padding:8px 15px; margin-left:5px; }
+    #writeBox, #fileBox, #viewBox { display:none; margin-top:20px; }
+    textarea { width:100%; height:200px; padding:10px; }
+    input { padding:8px; width:100%; margin-bottom:10px; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <h2>Yazılar</h2>
+  <div id="adminButtons" style="display:none;">
+    <button onclick="showWrite()">Yazı Yaz</button>
+    <button onclick="showFile()">Yazı Ekle (Dosya)</button>
+    <button onclick="logout()">Çıkış Yap</button>
+  </div>
+</div>
+
+<div id="listBox"></div>
+
+<!-- Yazı Yazma Kutusu -->
+<div id="writeBox">
+  <h3>Yeni Yazı Yaz</h3>
+  <input id="titleInput" placeholder="Başlık" />
+  <textarea id="contentInput" placeholder="İçerik"></textarea>
+  <button onclick="saveDraft()">Taslak Kaydet</button>
+  <button onclick="publishArticle()">Yayınla</button>
+</div>
+
+<!-- Dosya Yükleme Kutusu -->
+<div id="fileBox">
+  <h3>Dosyadan Yazı Ekle</h3>
+  <input type="file" id="fileInput" />
+  <button onclick="uploadFile()">Yükle</button>
+</div>
+
+<!-- Yazı Görüntüleme -->
+<div id="viewBox">
+  <button onclick="hideView()">← Geri</button>
+  <h2 id="viewTitle"></h2>
+  <div id="viewContent"></div>
+</div>
+
+<script>
+let admin = localStorage.getItem('admin') === '1';
+let articles = JSON.parse(localStorage.getItem('articles') || '[]');
+
+function saveAll() {
+  localStorage.setItem('articles', JSON.stringify(articles));
+}
+
+function logout() {
+  localStorage.removeItem('admin');
+  window.location.href = 'index.html';
+}
+
+function loadList() {
+  document.getElementById('writeBox').style.display = 'none';
+  document.getElementById('fileBox').style.display = 'none';
+  document.getElementById('viewBox').style.display = 'none';
+
+  let listBox = document.getElementById('listBox');
+  listBox.innerHTML = '';
+
+  if (admin) document.getElementById('adminButtons').style.display = 'block';
+
+  articles
+    .filter(a => admin || a.status === 'published')
+    .forEach((a, i) => {
+      let div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `<b>${a.title}</b> <small>(${a.status})</small>`;
+      div.onclick = () => viewArticle(i);
+      listBox.appendChild(div);
+    });
+}
+
+function showWrite() {
+  document.getElementById('writeBox').style.display = 'block';
+  document.getElementById('fileBox').style.display = 'none';
+  document.getElementById('viewBox').style.display = 'none';
+}
+
+function showFile() {
+  document.getElementById('fileBox').style.display = 'block';
+  document.getElementById('writeBox').style.display = 'none';
+  document.getElementById('viewBox').style.display = 'none';
+}
+
+function saveDraft() {
+  let t = document.getElementById('titleInput').value;
+  let c = document.getElementById('contentInput').value;
+  if (!t) return alert('Başlık gerekli');
+
+  articles.unshift({ title: t, content: c, status: 'draft', isFile:false });
+  saveAll();
+  loadList();
+}
+
+function publishArticle() {
+  let t = document.getElementById('titleInput').value;
+  let c = document.getElementById('contentInput').value;
+  if (!t || !c) return alert('Başlık ve içerik gerekli');
+
+  articles.unshift({ title: t, content: c, status: 'published', isFile:false });
+  saveAll();
+  loadList();
+}
+
+function uploadFile() {
+  let file = document.getElementById('fileInput').files[0];
+  if (!file) return alert('Dosya seçin');
+
+  let reader = new FileReader();
+  reader.onload = e => {
+    articles.unshift({ title: file.name, content: e.target.result, isFile:true, status:'published' });
+    saveAll();
+    loadList();
+  };
+  reader.readAsDataURL(file);
+}
+
+function viewArticle(i) {
+  let a = articles[i];
+  document.getElementById('viewTitle').innerText = a.title;
+  document.getElementById('viewContent').innerHTML = a.isFile
+    ? `<a href="${a.content}" download>Dosyayı indir</a>`
+    : a.content.replace(/\n/g, '<br>');
+
+  document.getElementById('viewBox').style.display = 'block';
+  document.getElementById('fileBox').style.display = 'none';
+  document.getElementById('writeBox').style.display = 'none';
+}
+
+function hideView() {
+  document.getElementById('viewBox').style.display = 'none';
+}
+
+loadList();
+</script>
+</body>
+</html>
