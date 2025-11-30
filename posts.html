@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tüm Yazılar</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:20px; background:#f9f9f9; }
+  .container { max-width:800px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
+  .card { padding:15px; margin-bottom:12px; border:1px solid #ddd; border-radius:8px; background:#fff; }
+  h3 { margin-top:0; }
+  .meta { font-size:12px; color:#666; margin-bottom:5px; }
+  a { color:#2b6cb0; text-decoration:none; }
+  button { padding:6px 10px; margin-left:5px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Tüm Yazılar</h1>
+  <div id="postsList"></div>
+</div>
+
+<script>
+let state = JSON.parse(localStorage.getItem('blog_state') || '{}');
+let isAdmin = localStorage.getItem('admin')==='1';
+
+function renderPosts(){
+  const el = document.getElementById('postsList');
+  el.innerHTML='';
+  if(!state.posts) return;
+  state.posts.filter(p=>p.published || isAdmin).sort((a,b)=>b.date.localeCompare(a.date)).forEach(p=>{
+    const div = document.createElement('div');
+    div.className='card';
+    div.innerHTML = `<h3><a href='post.html?id=${p.id}'>${p.title}</a></h3>`+
+                    `<div class='meta'>${new Date(p.date).toLocaleString()} ${!p.published?'(Taslak)':''}</div>`;
+    if(isAdmin){
+      const btnEdit = document.createElement('button'); btnEdit.textContent='Düzenle'; btnEdit.onclick=()=>{localStorage.setItem('editPost', JSON.stringify(p)); window.location.href='admin-dashboard.html';};
+      const btnDel = document.createElement('button'); btnDel.textContent='Sil'; btnDel.onclick=()=>{ if(confirm('Silinsin mi?')){ state.posts = state.posts.filter(x=>x.id!==p.id); localStorage.setItem('blog_state', JSON.stringify(state)); renderPosts(); } };
+      div.appendChild(btnEdit); div.appendChild(btnDel);
+    }
+    el.appendChild(div);
+  });
+}
+
+renderPosts();
+</script>
+</body>
+</html>
