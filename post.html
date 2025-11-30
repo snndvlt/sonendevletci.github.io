@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yazı</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:20px; background:#f9f9f9; }
+  .container { max-width:800px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
+  h1 { margin-top:0; }
+  .meta { font-size:12px; color:#666; margin-bottom:10px; }
+  img.cover { max-width:100%; height:auto; border-radius:8px; margin-bottom:15px; }
+  button { padding:8px 12px; margin-top:10px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="container">
+  <button onclick="goBack()">← Geri</button>
+  <h1 id="postTitle">Yazı Başlığı</h1>
+  <div class="meta" id="postDate">Tarih</div>
+  <img id="postCover" class="cover" src="" alt="Kapak" style="display:none">
+  <div id="postContent"></div>
+  <div id="adminEdit" style="margin-top:15px; display:none">
+    <button onclick="editPost()">Yazıyı Düzenle</button>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const postId = params.get('id');
+let state = JSON.parse(localStorage.getItem('blog_state') || '{}');
+let isAdmin = localStorage.getItem('admin')==='1';
+
+function goBack(){ window.history.back(); }
+
+function editPost(){
+  // Formu index.html veya admin.html’de açmak için 
+  // Tekil post silinir ve form doldurulur
+  const p = state.posts.find(x=>x.id===postId);
+  if(!p){ alert('Yazı bulunamadı'); return; }
+  localStorage.setItem('editPost', JSON.stringify(p));
+  window.location.href='admin-dashboard.html';
+}
+
+function renderPost(){
+  if(!state.posts) return;
+  const p = state.posts.find(x=>x.id===postId);
+  if(!p){ document.getElementById('postContent').innerHTML='Yazı bulunamadı'; return; }
+
+  document.getElementById('postTitle').textContent = p.title;
+  document.getElementById('postDate').textContent = new Date(p.date).toLocaleString();
+  if(p.cover){
+    const img = document.getElementById('postCover');
+    img.src = p.cover;
+    img.style.display='block';
+  }
+  document.getElementById('postContent').innerHTML = p.content;
+
+  if(isAdmin) document.getElementById('adminEdit').style.display='block';
+}
+
+renderPost();
+</script>
+</body>
+</html>
