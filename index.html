@@ -1,361 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Github Pages Blog - Demo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog</title>
   <style>
-    /* Basit, temiz stil */
-    :root{--accent:#2b6cb0;--muted:#666}
-    body{font-family:Inter, system-ui, -apple-system,Segoe UI, Roboto, 'Helvetica Neue', Arial; margin:0; color:#111}
-    header{background:linear-gradient(90deg,#0b57a4 0%, #3aa0ff 100%); color:#fff; padding:18px}
-    .container{max-width:980px;margin:18px auto;padding:0 16px}
-    nav{display:flex;gap:12px;align-items:center}
-    a.nav{color:#fff;text-decoration:none;font-weight:600}
-    .cover{height:220px;background:#ddd;display:flex;align-items:center;justify-content:center;color:#444;font-size:18px;overflow:hidden}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-    .card{border:1px solid #eee;border-radius:10px;padding:12px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
-    .small{font-size:13px;color:var(--muted)}
-    .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
-    .ghost{background:transparent;border:1px solid #ddd;padding:6px 10px;border-radius:8px}
-    .posts-list a{display:block;padding:8px 0;border-bottom:1px dashed #f0f0f0;color:var(--accent);text-decoration:none}
-    footer{padding:18px;text-align:center;color:#666}
-    .admin-bar{margin-left:auto}
-    .hidden{display:none}
-    textarea{width:100%;min-height:180px}
-    input[type=file]{display:block}
-    .preview-img{max-width:100%;height:150px;object-fit:cover;border-radius:8px}
-    video{max-width:100%;height:auto;border-radius:8px}
-    .meta{font-size:12px;color:var(--muted)}
+    body { font-family: Arial; margin: 0; padding: 0; }
+    header { background: #333; color: #fff; padding: 15px; display: flex; justify-content: space-between; }
+    header a, header button { color: #fff; margin-right: 15px; cursor: pointer; text-decoration: none; background:none; border:none; font-size:16px; }
+    .page { display: none; padding: 20px; }
+    .active { display: block; }
+    .card { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; cursor: pointer; }
+    .right { float: right; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="container" style="display:flex;align-items:center;">
-      <div>
-        <h1 style="margin:0">Sönen Devletçi Polemik</h1>
-        <div class="small">Giriş · Yazılar · Yayınlar</div>
-      </div>
-      <div class="admin-bar">
-        <button id="adminToggle" class="ghost">Yönetici Girişi</button>
-      </div>
-    </div>
-  </header>
+<header>
+  <div>
+    <a href="index.html">Home</a>
+    <a href="posts.html">Yazılar</a>
+    <a href="videos.html">Yayınlar</a>
+  </div>
+  <div>
+    <button id="adminToggle">Yönetici Girişi</button>
+  </div>
+</header>
 
-  <main class="container">
-    <!-- ROUTES: #/ , #/posts , #/post/:id , #/videos , #/video/:id , #/admin -->
+<div id="home" class="page active">
+  <h2>Ana Sayfa</h2>
+  <div id="homeLatest">
+    <div class="card"><a href="posts.html">Yazılar</a></div>
+    <div class="card"><a href="videos.html">Yayınlar</a></div>
+  </div>
+</div>
 
-    <section id="home" class="page">
-      <div class="cover card" id="coverPhoto">Kapak fotoğrafı </div>
-      <div style="display:flex;gap:18px;margin-top:16px;align-items:center;">
-        <div style="flex:1">
-          <h2>Hakkında</h2>
-          <p id="aboutText">Sönen Devletçi Polemik yayınlarını burada bulabilirsiniz</p>
-        </div>
-        <div style="width:260px">
-          <div class="card">
-            <h3 style="margin-top:0">Yazılar</h3>
-            <div id="latestPosts" class="posts-list small"></div>
-          </div>
-          <div class="card" style="margin-top:10px">
-            <h3 style="margin-top:0">Yayınlar</h3>
-            <div id="latestVideos" class="posts-list small"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="posts" class="page hidden">
-      <h2>Yazılar</h2>
-      <div class="card">
-        <div id="postsList" class="posts-list"></div>
-      </div>
-    </section>
-
-    <section id="postDetail" class="page hidden">
-      <button id="backToPosts" class="ghost">← Geri</button>
-      <div class="card" id="postContent"></div>
-    </section>
-
-    <section id="videos" class="page hidden">
-      <h2>Yayınlar</h2>
-      <div class="grid" id="videosGrid"></div>
-    </section>
-
-    <section id="videoDetail" class="page hidden">
-      <button id="backToVideos" class="ghost">← Geri</button>
-      <div class="card" id="videoContent"></div>
-    </section>
-
-    <section id="admin" class="page hidden">
-      <h2>Yönetici Paneli</h2>
-      <div class="grid">
-        <div class="card">
-          <h3>Kapak & Hakkında</h3>
-          <label>Hakkında Metni</label>
-          <textarea id="aboutInput"></textarea>
-          <label>Kapak Fotoğrafı (jpg/png)</label>
-          <input type="file" id="coverUpload" accept="image/*">
-          <button id="saveSiteMeta" class="btn">Kaydet</button>
-        </div>
-        <div class="card">
-          <h3>Yeni Yazı (site içinde yaz)</h3>
-          <input id="postTitle" placeholder="Başlık">
-          <input id="postExcerpt" placeholder="Kısa özet (liste için)">
-          <label>Kapak (isteğe bağlı)</label>
-          <input type="file" id="postCover" accept="image/*">
-          <label>İçerik (HTML veya markdown desteklenir)</label>
-          <textarea id="postBody"></textarea>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button id="publishPost" class="btn">Yayınla</button>
-            <button id="saveDraft" class="ghost">Taslak Kaydet</button>
-            <button id="exportPosts" class="ghost">Dışa Aktar (.json)</button>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Yazı/Yayın Yükle (Dosya upload)</h3>
-          <label>Her türlü dosya (pdf, docx, md) - yazı olarak ekle</label>
-          <input type="file" id="fileUpload">
-          <button id="uploadFileBtn" class="btn">Upload ve Yazı Olarak Ekle</button>
-
-          <hr>
-          <h3>Video Yükle</h3>
-          <input type="file" id="videoUpload" accept="video/*">
-          <button id="uploadVideoBtn" class="btn">Video Yükle</button>
-        </div>
-      </div>
-      <div style="margin-top:12px" class="card">
-        <h3>Mevcut İçerikler</h3>
-        <div id="adminList" class="posts-list"></div>
-      </div>
-    </section>
-
-  </main>
-
-  <footer>
-    <div class="container">
-      Bu site GitHub Pages ile barındırılabilir. Oluşturulan içerikleri dışa aktarabilir veya manuel olarak repoya push edebilirsiniz.
-    </div>
-  </footer>
-
-  <script>
-    /* Basit veri modeli: localStorage'da saklanır. Gerçek sunucu/CI/CD olmadığı için otomatik repoya push burada yok.
-       Ürün ortamında GitHub API veya bir backend ekleyerek doğrudan repo'ya commit atılabilir. */
-
-    const ADMIN_PASSWORD = 'admin123'; // Değiştirin
-
-    // Util
-    const uid = ()=> Math.random().toString(36).slice(2,9);
-    function now(){return new Date().toISOString()}
-
-    // Storage helpers
-    function loadState(){
-      const raw = localStorage.getItem('blog_state');
-      if(!raw){
-        const init = {
-          siteMeta: {about: 'Hoşgeldiniz! Buraya hakkınızda kısa bişey yazabilirsiniz.', cover: ''},
-          posts: [
-            {id:uid(),title:'Hoşgeldiniz',excerpt:'Demo yazı',date:now(),content:'<p>Bu demo bir yazıdır.</p>',cover:'',published:true}
-          ],
-          videos: []
-        };
-        localStorage.setItem('blog_state', JSON.stringify(init));
-        return init;
-      }
-      try{return JSON.parse(raw)}catch(e){console.error(e);return null}
-    }
-    function saveState(s){localStorage.setItem('blog_state', JSON.stringify(s))}
-
-    let state = loadState();
-
-    // Routing
-    function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));document.getElementById(id).classList.remove('hidden')}
-    function router(){
-      const hash = location.hash || '#/';
-      if(hash === '#/' || hash === '#') return showPage('home');
-      if(hash.startsWith('#/posts')){
-        const parts = hash.split('/');
-        if(parts.length===3 && parts[2]) return showPost(parts[2]);
-        showPage('posts'); renderPosts(); return
-      }
-      if(hash.startsWith('#/videos')){
-        const parts = hash.split('/');
-        if(parts.length===3 && parts[2]) return showVideo(parts[2]);
-        showPage('videos'); renderVideos(); return
-      }
-      if(hash === '#/admin') return showAdmin();
-      // default
-      showPage('home')
-    }
-    window.addEventListener('hashchange', router);
-
-    // Renderers
-    function renderHomeLatest(){
-      const lp = document.getElementById('latestPosts'); lp.innerHTML='';
-      const latest = state.posts.filter(p=>p.published).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
-      latest.forEach(p=>{const a=document.createElement('a');a.href=#/posts/${p.id};a.textContent=${p.title} — ${new Date(p.date).toLocaleDateString()};lp.appendChild(a)})
-      const lv = document.getElementById('latestVideos'); lv.innerHTML='';
-      const latestV = state.videos.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
-      latestV.forEach(v=>{const a=document.createElement('a');a.href=#/videos/${v.id};a.textContent=${v.title || v.name} — ${new Date(v.date).toLocaleDateString()};lv.appendChild(a)})
-    }
-    function renderPosts(){
-      const list = document.getElementById('postsList'); list.innerHTML='';
-      state.posts.sort((a,b)=>b.date.localeCompare(a.date)).forEach(p=>{
-        const div=document.createElement('div'); div.className='card';
-        div.innerHTML = <h3><a href="#/posts/${p.id}">${p.title}</a></h3><div class="meta">${new Date(p.date).toLocaleString()}</div><p>${p.excerpt||''}</p>;
-        list.appendChild(div);
-      })
-    }
-    function showPost(id){
-      const p = state.posts.find(x=>x.id===id); if(!p){alert('Yazı bulunamadı'); location.hash='#/posts'; return}
-      showPage('postDetail');
-      document.getElementById('postContent').innerHTML = <h2>${p.title}</h2><div class="meta">${new Date(p.date).toLocaleString()}</div>${p.cover?<img src="${p.cover}" class="preview-img">:''}<div>${p.content}</div>;
-    }
-    function renderVideos(){
-      const grid = document.getElementById('videosGrid'); grid.innerHTML='';
-      state.videos.sort((a,b)=>b.date.localeCompare(a.date)).forEach(v=>{
-        const card=document.createElement('div'); card.className='card';
-        card.innerHTML = <h4>${v.title||v.name}</h4><div class="meta">${new Date(v.date).toLocaleString()}</div>${v.thumbnail?<img src="${v.thumbnail}" class="preview-img">:''}<div style="margin-top:8px"><a href="#/videos/${v.id}" class="btn">İzle</a></div>;
-        grid.appendChild(card);
-      })
-    }
-    function showVideo(id){
-      const v = state.videos.find(x=>x.id===id); if(!v){alert('Yayın bulunamadı'); location.hash='#/videos'; return}
-      showPage('videoDetail');
-      const content = document.getElementById('videoContent');
-      content.innerHTML = <h2>${v.title||v.name}</h2><div class="meta">${new Date(v.date).toLocaleString()}</div><video controls src="${v.data}"></video><p>${v.description||''}</p>;
-    }
-
-    // Admin
-    let isAdmin=false;
-    document.getElementById('adminToggle').addEventListener('click',()=>{
-      if(isAdmin){isAdmin=false; location.hash='#/'; document.getElementById('adminToggle').textContent='Yönetici Girişi'; return}
-      const pw = prompt('Yönetici parolası:'); if(pw===ADMIN_PASSWORD){isAdmin=true; location.hash='#/admin'; document.getElementById('adminToggle').textContent='Çıkış Yap'}else alert('Parola yanlış')
-    })
-
-    function showAdmin(){
-      if(!isAdmin){alert('Yönetici değilsiniz'); location.hash='#/'; return}
-      showPage('admin');
-      // fill inputs
-      document.getElementById('aboutInput').value = state.siteMeta.about||'';
-    }
-
-    document.getElementById('saveSiteMeta').addEventListener('click',async()=>{
-      state.siteMeta.about = document.getElementById('aboutInput').value;
-      const f = document.getElementById('coverUpload').files[0];
-      if(f){state.siteMeta.cover = await fileToDataURL(f); document.getElementById('coverPhoto').style.backgroundImage = url(${state.siteMeta.cover}); document.getElementById('coverPhoto').textContent='';}
-      saveState(state); renderHomeLatest(); alert('Kaydedildi');
-    })
-
-    // create/publish post
-    async function fileToDataURL(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(file)})}
-
-    document.getElementById('publishPost').addEventListener('click', async ()=>{
-      const title = document.getElementById('postTitle').value.trim(); if(!title){alert('Başlık gerekli');return}
-      const excerpt = document.getElementById('postExcerpt').value;
-      const body = document.getElementById('postBody').value;
-      let cover = '';
-      const cf = document.getElementById('postCover').files[0]; if(cf) cover = await fileToDataURL(cf);
-      const p = {id:uid(),title,excerpt,content:body||'<p></p>',cover,published:true,date:now()};
-      state.posts.push(p); saveState(state); alert('Yayınlandı'); location.hash = #/posts/${p.id}; router();
-    })
-    document.getElementById('saveDraft').addEventListener('click', async ()=>{
-      const title = document.getElementById('postTitle').value.trim()||'Untitled';
-      const excerpt = document.getElementById('postExcerpt').value;
-      const body = document.getElementById('postBody').value;
-      let cover = '';
-      const cf = document.getElementById('postCover').files[0]; if(cf) cover = await fileToDataURL(cf);
-      const p = {id:uid(),title,excerpt,content:body||'<p></p>',cover,published:false,date:now()};
-      state.posts.push(p); saveState(state); alert('Taslak kaydedildi'); renderAdminList();
-    })
-
-    document.getElementById('exportPosts').addEventListener('click', ()=>{
-      const data = JSON.stringify(state, null, 2);
-      const blob = new Blob([data], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download = 'blog_export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    })
-
-    // upload arbitrary file as a "post" (attachment)
-    document.getElementById('uploadFileBtn').addEventListener('click', async ()=>{
-      const f = document.getElementById('fileUpload').files[0]; if(!f){alert('Dosya seçin'); return}
-      const data = await fileToDataURL(f);
-      const p = {id:uid(), title: f.name, excerpt: Uploaded file: ${f.name}, content: <p>Dosya: <a href=\"${data}\" download=\"${f.name}\">${f.name}</a></p>, cover:'', published:true, date:now()};
-      state.posts.push(p); saveState(state); alert('Dosya yazı olarak eklendi'); renderAdminList(); renderHomeLatest();
-    })
-
-    // upload video
-    document.getElementById('uploadVideoBtn').addEventListener('click', async ()=>{
-      const f = document.getElementById('videoUpload').files[0]; if(!f){alert('Video seçin'); return}
-      // Uygun boyutlarda tutun: localStorage sınırlı olabilir. Küçük videolar demo için uygundur.
-      const data = await fileToDataURL(f);
-      const v = {id:uid(), name:f.name, title:f.name, description:'', data, date:now(), thumbnail:''};
-      state.videos.push(v); saveState(state); alert('Video yüklendi'); renderAdminList(); renderHomeLatest();
-    })
-
-    function renderAdminList(){
-      const el = document.getElementById('adminList'); el.innerHTML='';
-      state.posts.concat(state.videos).sort((a,b)=> (b.date||'').localeCompare(a.date||'')).forEach(item=>{
-        const div=document.createElement('div'); div.style.padding='8px 0';
-        if(item.content!==undefined){ // post
-          div.innerHTML = <strong>${item.title}</strong> <span class="small">${item.published? ' (yayınlandı)':' (taslak)'}</span><div class="small">${new Date(item.date).toLocaleString()}</div><div style="margin-top:6px"><button class="ghost" data-id="${item.id}" data-action="edit">Düzenle</button> <button class="ghost" data-id="${item.id}" data-action="delete">Sil</button></div>;
-        } else { // video
-          div.innerHTML = <strong>${item.title||item.name}</strong><div class="small">Video — ${new Date(item.date).toLocaleString()}</div><div style="margin-top:6px"><button class="ghost" data-id="${item.id}" data-action="play">Oynat</button> <button class="ghost" data-id="${item.id}" data-action="delete">Sil</button></div>;
-        }
-        el.appendChild(div);
-      })
-    }
-
-    document.getElementById('adminList').addEventListener('click', (e)=>{
-      const btn = e.target.closest('button'); if(!btn) return;
-      const id = btn.dataset.id; const action = btn.dataset.action;
-      if(action==='delete'){
-        if(!confirm('Silinsin mi?')) return;
-        state.posts = state.posts.filter(p=>p.id!==id); state.videos = state.videos.filter(v=>v.id!==id); saveState(state); renderAdminList(); renderHomeLatest(); alert('Silindi');
-      }
-      if(action==='play'){
-        location.hash = #/videos/${id};
-      }
-      if(action==='edit'){
-        const p = state.posts.find(x=>x.id===id); if(!p) return;
-        // fill admin form
-        document.getElementById('postTitle').value = p.title; document.getElementById('postExcerpt').value = p.excerpt||''; document.getElementById('postBody').value = p.content||'';
-        // delete old and allow re-publish as new
-        state.posts = state.posts.filter(x=>x.id!==id); saveState(state); renderAdminList(); alert('İçerik formu dolduruldu. Değiştirip tekrar yayınlayın.');
-      }
-    })
-
-    // wire up back buttons
-    document.getElementById('backToPosts').addEventListener('click', ()=>{ location.hash = '#/posts' })
-    document.getElementById('backToVideos').addEventListener('click', ()=>{ location.hash = '#/videos' })
-
-    // Initialize UI
-    function initUI(){
-      // cover
-      if(state.siteMeta.cover){ document.getElementById('coverPhoto').style.backgroundImage = url(${state.siteMeta.cover}); document.getElementById('coverPhoto').textContent=''; }
-      document.getElementById('aboutText').textContent = state.siteMeta.about||'';
-      renderHomeLatest(); renderAdminList();
-      // basic nav links
-      const nav = document.createElement('nav');
-      const homeLink = document.createElement('a'); homeLink.href='#/'; homeLink.className='nav'; homeLink.textContent='Home';
-      const postsLink = document.createElement('a'); postsLink.href='#/posts'; postsLink.className='nav'; postsLink.textContent='Yazılar';
-      const videosLink = document.createElement('a'); videosLink.href='#/videos'; videosLink.className='nav'; videosLink.textContent='Yayınlar';
-      const header = document.querySelector('header .container'); header.insertBefore(nav, header.children[1]); nav.append(homeLink, postsLink, videosLink);
-    }
-
-    initUI(); router();
-
-    // Expose helper to download current state as files (for manually pushing to GitHub)
-    window.exportForGit = function(){
-      // This will create a folder-like zip is not available; instead we provide JSON and also generate simple markdown files in new tab for each published post.
-      state.posts.filter(p=>p.published).forEach(p=>{
-        const md = ---\ntitle: ${p.title}\ndate: ${p.date}\n---\n\n${p.excerpt || ''}\n\n${p.content.replace(/<[^>]+>/g,'')};
-        const blob = new Blob([md], {type:'text/markdown'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = ${p.title.replace(/[^a-z0-9]/gi,'_').slice(0,40)}.md; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-      })
-    }
-
-  </script>
+<script>
+document.getElementById('adminToggle').addEventListener('click',()=>{
+    window.location.href = 'admin.html';
+});
+</script>
 </body>
 </html>
