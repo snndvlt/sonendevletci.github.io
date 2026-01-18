@@ -142,7 +142,7 @@ html, body{
 const params = new URLSearchParams(window.location.search);
 const postId = params.get('id');
 
-let state = JSON.parse(localStorage.getItem('blog_state') || '{}');
+let state = JSON.parse(localStorage.getItem('blog_state') || '{"posts":[]}');
 let isAdmin = localStorage.getItem('admin') === '1';
 
 function goBack(){
