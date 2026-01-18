@@ -34,16 +34,6 @@ button{
   color:#666;
   margin-bottom:15px;
 }
-#editBody{
-  min-height:70vh;
-  border:1px solid #ccc;
-  padding:15px;
-  font-size:16px;
-  overflow:auto;
-}
-.toolbar button{
-  margin-right:5px;
-}
 
 /* OKUMA MODU */
 #postContent{
@@ -55,11 +45,18 @@ button{
 
 /* DÜZENLEME MODU */
 #editBody{
+  min-height:70vh;
+  border:1px solid #ccc;
+  padding:15px;
+  font-size:16px;
+  overflow:auto;
+
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
   max-width: 100%;
 }
+
 
 /* İçerideki tüm elementler için güvenlik */
 #postContent *, 
@@ -67,6 +64,38 @@ button{
   max-width: 100%;
   box-sizing: border-box;
 }
+
+#postContent,
+#editBody{
+  line-height:1.7;
+  font-size:17px;
+}
+
+#postContent p{
+  margin-bottom:1em;
+}
+
+/* UZUN SATIRLARI ZORLA BÖL */
+#postContent,
+#editBody{
+  word-break: break-word;
+  overflow-x: hidden;
+}
+
+/* PDF / CODE / PRE GELİRSE */
+#postContent pre,
+#editBody pre{
+  white-space: pre-wrap;   /* pre ama wrap’li */
+  word-break: break-word;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Uzun linkler için */
+#postContent a{
+  word-break: break-all;
+}
+
 
 </style>
 </head>
