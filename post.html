@@ -39,7 +39,7 @@ function editPost(){
   const p = state.posts.find(x=>x.id===postId);
   if(!p){ alert('Yazı bulunamadı'); return; }
   localStorage.setItem('editPost', JSON.stringify(p));
-  window.location.href='admin-dashboard.html';
+  window.location.href='admin.html';
 }
 
 function renderPost(){
