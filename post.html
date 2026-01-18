@@ -16,28 +16,33 @@
 <body>
 <div class="container">
   <button onclick="goBack()">← Geri</button>
-  <h1 id="postTitle">Yazı Başlığı</h1>
-  <div class="meta" id="postDate">Tarih</div>
-  <img id="postCover" class="cover" src="" alt="Kapak" style="display:none">
-  <div id="postContent"></div>
-  <div id="editor" style="display:none; margin-top:20px;">
-  <hr>
-  <h3> Yazıyı Düzenle</h3>
 
-  <input id="editTitle" placeholder="Başlık">
-  <textarea id="editBody" style="height:300px;"></textarea>
+  <!-- OKUMA MODU -->
+  <div id="viewMode">
+    <h1 id="postTitle"></h1>
+    <div class="meta" id="postDate"></div>
+    <img id="postCover" class="cover" style="display:none">
+    <div id="postContent"></div>
 
-  <input type="file" id="editCover">
-
-  <div style="margin-top:10px;">
-    <button onclick="saveEdit(true)">💾 Güncelle & Yayınla</button>
-    <button onclick="saveEdit(false)">📄 Taslak</button>
-    <button onclick="deletePost()" style="background:#c53030;color:#fff;">🗑️ Sil</button>
+    <div id="adminEdit" style="display:none">
+      <button onclick="enterEditMode()">✏️ Düzenle</button>
+    </div>
   </div>
-</div>
 
-  <div id="adminEdit" style="margin-top:15px; display:none">
-    <button onclick="editPost()">Yazıyı Düzenle</button>
+  <!-- EDIT MODU -->
+  <div id="editMode" style="display:none">
+    <h2>Yazıyı Düzenle</h2>
+
+    <input id="editTitle" placeholder="Başlık">
+    <textarea id="editBody" style="height:60vh;"></textarea>
+    <input type="file" id="editCover">
+
+    <div style="margin-top:15px;">
+      <button onclick="saveEdit(true)">💾 Güncelle & Yayınla</button>
+      <button onclick="saveEdit(false)">📄 Taslak</button>
+      <button onclick="deletePost()" style="background:#c53030;color:#fff;">🗑️ Sil</button>
+      <button onclick="cancelEdit()">❌ Vazgeç</button>
+    </div>
   </div>
 </div>
 
@@ -50,20 +55,29 @@ let isAdmin = localStorage.getItem('admin')==='1';
 
 function goBack(){ window.history.back(); }
 
-function editPost(){
-  // Formu index.html veya admin.html’de açmak için 
-  // Tekil post silinir ve form doldurulur
+function enterEditMode(){
+  if(!isAdmin) return;
+
+  document.getElementById('viewMode').style.display = 'none';
+  document.getElementById('editMode').style.display = 'block';
+
   const p = state.posts.find(x=>x.id===postId);
-  if(!p){ alert('Yazı bulunamadı'); return; }
-  localStorage.setItem('editPost', JSON.stringify(p));
-  window.location.href='admin.html';
+  document.getElementById('editTitle').value = p.title;
+  document.getElementById('editBody').value = p.body;
 }
+
+function cancelEdit(){
+  document.getElementById('editMode').style.display = 'none';
+  document.getElementById('viewMode').style.display = 'block';
+}
+
 
 function renderPost(){
   if(!state.posts) return;
+
   const p = state.posts.find(x=>x.id===postId);
   if(!p){
-    document.getElementById('postContent').innerHTML='Yazı bulunamadı';
+    document.getElementById('postContent').innerHTML = 'Yazı bulunamadı';
     return;
   }
 
@@ -74,17 +88,13 @@ function renderPost(){
   if(p.cover){
     const img = document.getElementById('postCover');
     img.src = p.cover;
-    img.style.display='block';
+    img.style.display = 'block';
   }
 
-  //  EDIT MODE
-  if(isAdmin && editMode){
-    document.getElementById('editor').style.display = 'block';
-    document.getElementById('editTitle').value = p.title;
-    document.getElementById('editBody').value = p.body;
+  if(isAdmin){
+    document.getElementById('adminEdit').style.display = 'block';
   }
 }
-
 
 renderPost();
 
