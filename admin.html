@@ -13,10 +13,12 @@
   button { padding:8px 12px; cursor:pointer; margin-right:5px; }
   .posts-list div { margin-bottom:8px; }
 </style>
-<!-- PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<!-- Mammoth (DOCX) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+</script>
 </head>
 <body>
 <div class="container">
@@ -58,66 +60,6 @@
     <div id="adminList" class="posts-list"></div>
   </div>
 </div>
-<script>
-document.getElementById('uploadFileBtn').onclick = async () => {
-  const fileInput = document.getElementById('fileUpload');
-  const file = fileInput.files[0];
-
-  if(!file){
-    alert("Lütfen bir dosya seçin");
-    return;
-  }
-
-  const ext = file.name.split('.').pop().toLowerCase();
-  let content = "";
-
-  // TXT / MD / HTML
-  if(['txt','md','html'].includes(ext)){
-    content = await file.text();
-  }
-
-  // PDF
-  else if(ext === 'pdf'){
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
-    let text = "";
-
-    for(let i=1; i<=pdf.numPages; i++){
-      const page = await pdf.getPage(i);
-      const c = await page.getTextContent();
-      text += c.items.map(it=>it.str).join(" ") + "\n\n";
-    }
-    content = `<pre>${text}</pre>`;
-  }
-
-  // DOCX
-  else if(ext === 'docx'){
-    const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.convertToHtml({arrayBuffer});
-    content = result.value;
-  }
-
-  else{
-    alert("Desteklenmeyen dosya türü");
-    return;
-  }
-
-  const post = {
-    id: Date.now().toString(),
-    title: file.name.replace(/\.[^/.]+$/, ""),
-    excerpt: "Dosyadan yüklenen içerik",
-    body: content,
-    published: true,
-    date: new Date().toISOString()
-  };
-
-  if(!state.posts) state.posts = [];
-  state.posts.push(post);
-  localStorage.setItem('blog_state', JSON.stringify(state));
-
-  window.location.href = "posts.html";
-};
-</script>
 
   
 <script>
@@ -130,7 +72,7 @@ function fileToDataURL(file){ return new Promise((res,rej)=>{const fr=new FileRe
 function saveSiteMeta(){
   if(!state.posts) state.posts = [];
   if(!state.siteMeta) state.siteMeta = {};
-
+  renderAdminList();
   state.siteMeta.about = document.getElementById('aboutInput').value;
 
   const f = document.getElementById('coverUpload').files[0];
@@ -206,6 +148,66 @@ function savePost(published){
 
 document.getElementById('publishPost').onclick = ()=>savePost(true);
 document.getElementById('saveDraft').onclick = ()=>savePost(false);
+
+document.getElementById('uploadFileBtn').onclick = async () => {
+  const fileInput = document.getElementById('fileUpload');
+  const file = fileInput.files[0];
+
+  if(!file){
+    alert("Lütfen bir dosya seçin");
+    return;
+  }
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  let content = "";
+
+  // TXT / MD / HTML
+  if(['txt','md','html'].includes(ext)){
+    content = await file.text();
+  }
+
+  // PDF
+  else if(ext === 'pdf'){
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+    let text = "";
+
+    for(let i=1; i<=pdf.numPages; i++){
+      const page = await pdf.getPage(i);
+      const c = await page.getTextContent();
+      text += c.items.map(it=>it.str).join(" ") + "\n\n";
+    }
+    content = `<pre>${text}</pre>`;
+  }
+
+  // DOCX
+  else if(ext === 'docx'){
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.convertToHtml({arrayBuffer});
+    content = result.value;
+  }
+
+  else{
+    alert("Desteklenmeyen dosya türü");
+    return;
+  }
+
+  const post = {
+    id: Date.now().toString(),
+    title: file.name.replace(/\.[^/.]+$/, ""),
+    excerpt: "Dosyadan yüklenen içerik",
+    body: content,
+    published: true,
+    date: new Date().toISOString()
+  };
+
+  if(!state.posts) state.posts = [];
+  state.posts.push(post);
+  localStorage.setItem('blog_state', JSON.stringify(state));
+
+  window.location.href = "posts.html";
+};
+
 </script>
 </body>
 </html>
