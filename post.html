@@ -213,6 +213,30 @@ function deletePost(){
   window.location.href = "posts.html";
 }
 
+function normalizeContent(container){
+  if(!container) return;
+
+  /* PRE TAGLERINI DIV'E CEVIR */
+  container.querySelectorAll('pre').forEach(pre=>{
+    const div = document.createElement('div');
+    div.innerHTML = pre.innerHTML;
+    div.style.whiteSpace = 'normal';
+    div.style.wordBreak = 'break-all';
+    div.style.overflowWrap = 'anywhere';
+    pre.replaceWith(div);
+  });
+
+  /* INLINE nowrap TEMIZLE */
+  container.querySelectorAll('[style]').forEach(el=>{
+    if(el.style.whiteSpace === 'nowrap' || el.style.whiteSpace === 'pre'){
+      el.style.whiteSpace = 'normal';
+      el.style.wordBreak = 'break-all';
+      el.style.overflowWrap = 'anywhere';
+    }
+  });
+}
+
+
 renderPost();
 </script>
 </body>
