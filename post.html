@@ -20,6 +20,22 @@
   <div class="meta" id="postDate">Tarih</div>
   <img id="postCover" class="cover" src="" alt="Kapak" style="display:none">
   <div id="postContent"></div>
+  <div id="editor" style="display:none; margin-top:20px;">
+  <hr>
+  <h3> Yazıyı Düzenle</h3>
+
+  <input id="editTitle" placeholder="Başlık">
+  <textarea id="editBody" style="height:300px;"></textarea>
+
+  <input type="file" id="editCover">
+
+  <div style="margin-top:10px;">
+    <button onclick="saveEdit(true)">💾 Güncelle & Yayınla</button>
+    <button onclick="saveEdit(false)">📄 Taslak</button>
+    <button onclick="deletePost()" style="background:#c53030;color:#fff;">🗑️ Sil</button>
+  </div>
+</div>
+
   <div id="adminEdit" style="margin-top:15px; display:none">
     <button onclick="editPost()">Yazıyı Düzenle</button>
   </div>
@@ -28,6 +44,7 @@
 <script>
 const params = new URLSearchParams(window.location.search);
 const postId = params.get('id');
+const editMode = params.get('edit') === '1';
 let state = JSON.parse(localStorage.getItem('blog_state') || '{}');
 let isAdmin = localStorage.getItem('admin')==='1';
 
@@ -45,21 +62,63 @@ function editPost(){
 function renderPost(){
   if(!state.posts) return;
   const p = state.posts.find(x=>x.id===postId);
-  if(!p){ document.getElementById('postContent').innerHTML='Yazı bulunamadı'; return; }
+  if(!p){
+    document.getElementById('postContent').innerHTML='Yazı bulunamadı';
+    return;
+  }
 
   document.getElementById('postTitle').textContent = p.title;
   document.getElementById('postDate').textContent = new Date(p.date).toLocaleString();
+  document.getElementById('postContent').innerHTML = p.body;
+
   if(p.cover){
     const img = document.getElementById('postCover');
     img.src = p.cover;
     img.style.display='block';
   }
-  document.getElementById('postContent').innerHTML = p.body;
 
-  if(isAdmin) document.getElementById('adminEdit').style.display='block';
+  //  EDIT MODE
+  if(isAdmin && editMode){
+    document.getElementById('editor').style.display = 'block';
+    document.getElementById('editTitle').value = p.title;
+    document.getElementById('editBody').value = p.body;
+  }
 }
 
+
 renderPost();
+
+function saveEdit(published){
+  const p = state.posts.find(x=>x.id===postId);
+  if(!p) return alert("Yazı bulunamadı");
+
+  p.title = document.getElementById('editTitle').value.trim();
+  p.body = document.getElementById('editBody').value.trim();
+  p.published = published;
+  p.date = new Date().toISOString();
+
+  const coverFile = document.getElementById('editCover').files[0];
+  if(coverFile){
+    const fr = new FileReader();
+    fr.onload = ()=>{
+      p.cover = fr.result;
+      localStorage.setItem('blog_state', JSON.stringify(state));
+      location.reload();
+    };
+    fr.readAsDataURL(coverFile);
+  } else {
+    localStorage.setItem('blog_state', JSON.stringify(state));
+    location.reload();
+  }
+}
+
+function deletePost(){
+  if(!confirm("Bu yazı silinsin mi?")) return;
+  state.posts = state.posts.filter(x=>x.id!==postId);
+  localStorage.setItem('blog_state', JSON.stringify(state));
+  window.location.href = "posts.html";
+}
+
 </script>
 </body>
 </html>
