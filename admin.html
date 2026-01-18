@@ -72,7 +72,6 @@ function fileToDataURL(file){ return new Promise((res,rej)=>{const fr=new FileRe
 function saveSiteMeta(){
   if(!state.posts) state.posts = [];
   if(!state.siteMeta) state.siteMeta = {};
-  renderAdminList();
   state.siteMeta.about = document.getElementById('aboutInput').value;
 
   const f = document.getElementById('coverUpload').files[0];
@@ -106,11 +105,10 @@ function renderAdminList(){
     });
 }
 
-
-renderAdminList();
-
 if(!state.posts) state.posts = [];
 if(!state.siteMeta) state.siteMeta = {};
+renderAdminList();
+
 
 function savePost(published){
   const title = document.getElementById('postTitle').value.trim();
@@ -153,59 +151,77 @@ document.getElementById('uploadFileBtn').onclick = async () => {
   const fileInput = document.getElementById('fileUpload');
   const file = fileInput.files[0];
 
-  if(!file){
+  if (!file) {
     alert("Lütfen bir dosya seçin");
     return;
   }
 
+  const loadingEl = document.getElementById("loading");
+  loadingEl.style.display = "block";
+
   const ext = file.name.split('.').pop().toLowerCase();
   let content = "";
 
-  // TXT / MD / HTML
-  if(['txt','md','html'].includes(ext)){
-    content = await file.text();
-  }
-
-  // PDF
-  else if(ext === 'pdf'){
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
-    let text = "";
-
-    for(let i=1; i<=pdf.numPages; i++){
-      const page = await pdf.getPage(i);
-      const c = await page.getTextContent();
-      text += c.items.map(it=>it.str).join(" ") + "\n\n";
+  try {
+    // TXT / MD / HTML
+    if (['txt', 'md', 'html'].includes(ext)) {
+      content = await file.text();
     }
-    content = `<pre>${text}</pre>`;
+
+    // PDF (DONMAYAN VERSİYON)
+    else if (ext === 'pdf') {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+      let text = "";
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const c = await page.getTextContent();
+        text += c.items.map(it => it.str).join(" ") + "\n\n";
+
+        // 🧠 Her 5 sayfada UI'ye nefes aldır
+        if (i % 5 === 0) {
+          await new Promise(requestAnimationFrame);
+        }
+      }
+
+      content = `<pre>${text.replace(/[<>]/g, "")}</pre>`;
+    }
+
+    // DOCX
+    else if (ext === 'docx') {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer });
+      content = result.value;
+    }
+
+    else {
+      alert("Desteklenmeyen dosya türü");
+      return;
+    }
+
+    const post = {
+      id: Date.now().toString(),
+      title: file.name.replace(/\.[^/.]+$/, ""),
+      excerpt: "Dosyadan yüklenen içerik",
+      body: content,
+      published: true,
+      date: new Date().toISOString()
+    };
+
+    if (!state.posts) state.posts = [];
+    state.posts.push(post);
+    localStorage.setItem('blog_state', JSON.stringify(state));
+
+    window.location.href = "posts.html";
+
+  } catch (err) {
+    console.error(err);
+    alert("Dosya işlenirken hata oluştu");
+  } finally {
+    loadingEl.style.display = "none";
   }
-
-  // DOCX
-  else if(ext === 'docx'){
-    const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.convertToHtml({arrayBuffer});
-    content = result.value;
-  }
-
-  else{
-    alert("Desteklenmeyen dosya türü");
-    return;
-  }
-
-  const post = {
-    id: Date.now().toString(),
-    title: file.name.replace(/\.[^/.]+$/, ""),
-    excerpt: "Dosyadan yüklenen içerik",
-    body: content,
-    published: true,
-    date: new Date().toISOString()
-  };
-
-  if(!state.posts) state.posts = [];
-  state.posts.push(post);
-  localStorage.setItem('blog_state', JSON.stringify(state));
-
-  window.location.href = "posts.html";
 };
 
 </script>
