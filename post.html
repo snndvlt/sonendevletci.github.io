@@ -42,61 +42,44 @@ button{
   white-space: normal;
   max-width: 100%;
 }
+/* GLOBAL: ASLA YATAY SCROLL OLMASIN */
+html, body{
+  overflow-x: hidden;
+}
 
-/* DÜZENLEME MODU */
+/* OKUMA + EDİTÖR */
+#postContent,
 #editBody{
-  min-height:70vh;
-  border:1px solid #ccc;
-  padding:15px;
-  font-size:16px;
-  overflow:auto;
+  max-width: 100%;
+  line-height: 1.7;
+  font-size: 17px;
 
-  word-wrap: break-word;
-  overflow-wrap: break-word;
   white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow-x: hidden;
+}
+
+/* PRE / PDF / KOD BLOKLARI */
+#postContent pre,
+#editBody pre{
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+  overflow-x: hidden !important;
   max-width: 100%;
 }
 
-
-/* İçerideki tüm elementler için güvenlik */
-#postContent *, 
+/* TÜM İÇ ELEMANLAR */
+#postContent *,
 #editBody *{
   max-width: 100%;
   box-sizing: border-box;
 }
 
-#postContent,
-#editBody{
-  line-height:1.7;
-  font-size:17px;
-}
-
-#postContent p{
-  margin-bottom:1em;
-}
-
-/* UZUN SATIRLARI ZORLA BÖL */
-#postContent,
-#editBody{
-  word-break: break-word;
-  overflow-x: hidden;
-}
-
-/* PDF / CODE / PRE GELİRSE */
-#postContent pre,
-#editBody pre{
-  white-space: pre-wrap;   /* pre ama wrap’li */
-  word-break: break-word;
-  overflow-x: auto;
-  max-width: 100%;
-}
-
-/* Uzun linkler için */
+/* UZUN LİNKLER */
 #postContent a{
   word-break: break-all;
 }
-
-
 </style>
 </head>
 
