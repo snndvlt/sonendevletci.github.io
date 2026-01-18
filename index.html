@@ -6,6 +6,7 @@
 <title>Blog</title>
 
 <style>
+/* GENEL */
 body{
   font-family: Arial, sans-serif;
   margin:0;
@@ -45,45 +46,82 @@ header nav a:hover{
   font-size:15px;
 }
 
-/* PAGE */
+/* SAYFA */
 .container{
-  max-width:1100px;
+  max-width:900px;
   margin:auto;
-  padding:30px 20px;
-}
-h2{
-  margin-bottom:20px;
+  padding:40px 20px;
 }
 
-/* POSTS GRID */
+h2{
+  text-align:center;
+  margin-bottom:35px;
+}
+
+/* MAKALE LİSTESİ */
 .posts{
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap:20px;
+  display:flex;
+  flex-direction:column;
+  gap:35px;
 }
-.card{
+
+/* MAKALE GÖRÜNÜMÜ */
+.post-item{
   background:#fff;
-  border-radius:8px;
-  padding:20px;
-  cursor:pointer;
-  box-shadow:0 2px 8px rgba(0,0,0,0.1);
-  transition:.2s;
+  padding:30px 35px;
+  border-radius:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
 }
-.card:hover{
-  transform:translateY(-3px);
+
+.post-item h3{
+  margin:0 0 10px;
+  font-size:26px;
+  text-align:center;
 }
-.card h3{
-  margin-top:0;
-}
-.card .date{
-  font-size:12px;
+
+.post-item .date{
+  text-align:center;
+  font-size:13px;
   color:#777;
-  margin-bottom:10px;
+  margin-bottom:18px;
 }
-.card .preview{
+
+.post-item .preview{
+  font-size:16px;
+  line-height:1.7;
   color:#444;
-  font-size:14px;
-  line-height:1.5;
+  margin-bottom:18px;
+}
+
+/* DEVAMINI OKU */
+.read-more{
+  display:inline-block;
+  font-weight:bold;
+  color:#2563eb;
+  text-decoration:none;
+}
+
+.read-more:hover{
+  text-decoration:underline;
+}
+
+/* MOBİL */
+@media (max-width:768px){
+  body{
+    font-size:18px;
+  }
+
+  .post-item{
+    padding:22px;
+  }
+
+  .post-item h3{
+    font-size:22px;
+  }
+
+  .post-item .preview{
+    font-size:17px;
+  }
 }
 </style>
 </head>
@@ -134,28 +172,29 @@ function renderLatest(){
   const container = document.getElementById('latestPosts');
 
   state.posts
-    .filter(p=>p.published)
+    .filter(p => p.published)
     .sort((a,b)=> new Date(b.date) - new Date(a.date))
     .slice(0,3)
     .forEach(p=>{
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.onclick = ()=> {
-        window.location.href = `post.html?id=${p.id}`;
-      };
+      const article = document.createElement('article');
+      article.className = 'post-item';
 
-      div.innerHTML = `
+      article.innerHTML = `
         <h3>${p.title}</h3>
         <div class="date">${new Date(p.date).toLocaleDateString()}</div>
         <div class="preview">
-          ${stripHtml(p.body).slice(0,120)}...
+          ${stripHtml(p.body).slice(0,220)}...
         </div>
+        <a class="read-more" href="post.html?id=${p.id}">
+          Devamını oku →
+        </a>
       `;
-      container.appendChild(div);
+
+      container.appendChild(article);
     });
 }
 
-/* HTML TEMİZLE (ÖNİZLEME İÇİN) */
+/* HTML TEMİZLE (ÖNİZLEME) */
 function stripHtml(html){
   const div = document.createElement('div');
   div.innerHTML = html;
