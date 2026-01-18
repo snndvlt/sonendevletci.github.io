@@ -1,54 +1,169 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Blog</title>
-  <style>
-    body { font-family: Arial; margin: 0; padding: 0; }
-    header { background: #333; color: #fff; padding: 15px; display: flex; justify-content: space-between; }
-    header a, header button { color: #fff; margin-right: 15px; cursor: pointer; text-decoration: none; background:none; border:none; font-size:16px; }
-    .page { display: none; padding: 20px; }
-    .active { display: block; }
-    .card { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; cursor: pointer; }
-    .right { float: right; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  margin:0;
+  background:#f4f4f4;
+}
+
+/* HEADER */
+header{
+  background:#222;
+  color:#fff;
+  padding:15px 30px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
+}
+header nav a{
+  color:#fff;
+  text-decoration:none;
+  margin:0 20px;
+  font-size:17px;
+}
+header nav a:hover{
+  text-decoration:underline;
+}
+
+/* ADMIN */
+.admin-area{
+  position:absolute;
+  right:20px;
+}
+.admin-area button{
+  background:none;
+  border:none;
+  color:#fff;
+  cursor:pointer;
+  font-size:15px;
+}
+
+/* PAGE */
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:30px 20px;
+}
+h2{
+  margin-bottom:20px;
+}
+
+/* POSTS GRID */
+.posts{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap:20px;
+}
+.card{
+  background:#fff;
+  border-radius:8px;
+  padding:20px;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  transition:.2s;
+}
+.card:hover{
+  transform:translateY(-3px);
+}
+.card h3{
+  margin-top:0;
+}
+.card .date{
+  font-size:12px;
+  color:#777;
+  margin-bottom:10px;
+}
+.card .preview{
+  color:#444;
+  font-size:14px;
+  line-height:1.5;
+}
+</style>
 </head>
+
 <body>
+
 <header>
-  <div>
-    <a href="index.html">Home</a>
+  <nav>
+    <a href="index.html">Ana Sayfa</a>
     <a href="posts.html">Yazılar</a>
-  </div>
-  <div>
-    <button id="adminToggle">Yönetici Girişi</button>
+  </nav>
+
+  <div class="admin-area">
+    <button id="adminBtn" style="display:none;">Yönetici</button>
     <button id="logoutBtn" style="display:none;">Çıkış</button>
   </div>
 </header>
 
-<div id="home" class="page active">
-  <h2>Ana Sayfa</h2>
-  <div id="homeLatest">
-    <div class="card"><a href="posts.html">Yazılar</a></div>
-  </div>
+<div class="container">
+  <h2>Son Yazılar</h2>
+  <div class="posts" id="latestPosts"></div>
 </div>
 
 <script>
-document.getElementById('adminToggle').addEventListener('click', ()=>{
-    window.location.href = 'admin-login.html';
-});
+const state = JSON.parse(localStorage.getItem('blog_state') || '{}');
 const isAdmin = localStorage.getItem('admin') === '1';
 
+/* ADMIN BUTONLARI */
 if(isAdmin){
+  document.getElementById('adminBtn').style.display = 'inline';
   document.getElementById('logoutBtn').style.display = 'inline';
 }
 
-document.getElementById('logoutBtn').onclick = () => {
+document.getElementById('adminBtn').onclick = ()=>{
+  window.location.href = 'posts.html';
+};
+
+document.getElementById('logoutBtn').onclick = ()=>{
   localStorage.removeItem('admin');
   alert('Çıkış yapıldı');
   location.reload();
 };
 
+/* SON 3 YAZI */
+function renderLatest(){
+  if(!state.posts) return;
+
+  const container = document.getElementById('latestPosts');
+
+  state.posts
+    .filter(p=>p.published)
+    .sort((a,b)=> new Date(b.date) - new Date(a.date))
+    .slice(0,3)
+    .forEach(p=>{
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.onclick = ()=> {
+        window.location.href = `post.html?id=${p.id}`;
+      };
+
+      div.innerHTML = `
+        <h3>${p.title}</h3>
+        <div class="date">${new Date(p.date).toLocaleDateString()}</div>
+        <div class="preview">
+          ${stripHtml(p.body).slice(0,120)}...
+        </div>
+      `;
+      container.appendChild(div);
+    });
+}
+
+/* HTML TEMİZLE (ÖNİZLEME İÇİN) */
+function stripHtml(html){
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent || '';
+}
+
+renderLatest();
 </script>
+
 </body>
 </html>
