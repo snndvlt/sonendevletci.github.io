@@ -72,6 +72,46 @@ function renderAdminList(){
 }
 
 renderAdminList();
+
+if(!state.posts) state.posts = [];
+if(!state.siteMeta) state.siteMeta = {};
+
+function savePost(published){
+  const title = document.getElementById('postTitle').value.trim();
+  const excerpt = document.getElementById('postExcerpt').value.trim();
+  const body = document.getElementById('postBody').value.trim();
+  const coverFile = document.getElementById('postCover').files[0];
+
+  if(!title || !body){
+    alert("Başlık ve içerik zorunlu");
+    return;
+  }
+
+  const post = {
+    id: Date.now().toString(),
+    title,
+    excerpt,
+    body,
+    published,
+    date: new Date().toISOString()
+  };
+
+  if(coverFile){
+    fileToDataURL(coverFile).then(data=>{
+      post.cover = data;
+      state.posts.push(post);
+      localStorage.setItem('blog_state', JSON.stringify(state));
+      window.location.href = "posts.html";
+    });
+  }else{
+    state.posts.push(post);
+    localStorage.setItem('blog_state', JSON.stringify(state));
+    window.location.href = "posts.html";
+  }
+}
+
+document.getElementById('publishPost').onclick = ()=>savePost(true);
+document.getElementById('saveDraft').onclick = ()=>savePost(false);
 </script>
 </body>
 </html>
