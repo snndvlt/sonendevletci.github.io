@@ -64,6 +64,9 @@ function fileToDataURL(file){ return new Promise((res,rej)=>{const fr=new FileRe
 
 function saveSiteMeta(){
   state.siteMeta.about = document.getElementById('aboutInput').value;
+  if(!state.posts) state.posts = [];
+  if(!state.siteMeta) state.siteMeta = {};
+
   const f = document.getElementById('coverUpload').files[0];
   if(f){ fileToDataURL(f).then(data=>{ state.siteMeta.cover=data; localStorage.setItem('blog_state',JSON.stringify(state)); alert('Kaydedildi'); });}
 }
@@ -71,13 +74,20 @@ function saveSiteMeta(){
 document.getElementById('saveSiteMeta').onclick = saveSiteMeta;
 
 function renderAdminList(){
-  const el = document.getElementById('adminList'); el.innerHTML='';
-  state.posts.concat(state.videos).sort((a,b)=> (b.date||'').localeCompare(a.date||'')).forEach(item=>{
-    const div = document.createElement('div');
-    div.textContent = item.title||item.name;
-    el.appendChild(div);
-  });
+  const el = document.getElementById('adminList');
+  el.innerHTML = '';
+
+  if(!state.posts) return;
+
+  state.posts
+    .sort((a,b)=> (b.date||'').localeCompare(a.date||''))
+    .forEach(item=>{
+      const div = document.createElement('div');
+      div.textContent = item.title;
+      el.appendChild(div);
+    });
 }
+
 
 renderAdminList();
 
