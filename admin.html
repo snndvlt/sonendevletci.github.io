@@ -63,13 +63,24 @@ localStorage.setItem('admin','1');
 function fileToDataURL(file){ return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(file);});}
 
 function saveSiteMeta(){
-  state.siteMeta.about = document.getElementById('aboutInput').value;
   if(!state.posts) state.posts = [];
   if(!state.siteMeta) state.siteMeta = {};
 
+  state.siteMeta.about = document.getElementById('aboutInput').value;
+
   const f = document.getElementById('coverUpload').files[0];
-  if(f){ fileToDataURL(f).then(data=>{ state.siteMeta.cover=data; localStorage.setItem('blog_state',JSON.stringify(state)); alert('Kaydedildi'); });}
+  if(f){
+    fileToDataURL(f).then(data=>{
+      state.siteMeta.cover = data;
+      localStorage.setItem('blog_state', JSON.stringify(state));
+      alert('Kaydedildi');
+    });
+  }else{
+    localStorage.setItem('blog_state', JSON.stringify(state));
+    alert('Kaydedildi');
+  }
 }
+
 
 document.getElementById('saveSiteMeta').onclick = saveSiteMeta;
 
