@@ -54,7 +54,7 @@ function renderPost(){
     img.src = p.cover;
     img.style.display='block';
   }
-  document.getElementById('postContent').innerHTML = p.content;
+  document.getElementById('postContent').innerHTML = p.body;
 
   if(isAdmin) document.getElementById('adminEdit').style.display='block';
 }
