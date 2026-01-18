@@ -4,39 +4,87 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yazı</title>
+
 <style>
-  body { font-family: Arial, sans-serif; margin:0; padding:20px; background:#f9f9f9; }
-  .container { max-width:800px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
-  h1 { margin-top:0; }
-  .meta { font-size:12px; color:#666; margin-bottom:10px; }
-  img.cover { max-width:100%; height:auto; border-radius:8px; margin-bottom:15px; }
-  button { padding:8px 12px; margin-top:10px; cursor:pointer; }
+body{
+  font-family: Arial, sans-serif;
+  margin:0;
+  padding:20px;
+  background:#f4f4f4;
+}
+.container{
+  max-width:900px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+button{
+  padding:8px 14px;
+  cursor:pointer;
+}
+.meta{
+  font-size:12px;
+  color:#666;
+  margin-bottom:15px;
+}
+#editBody{
+  min-height:70vh;
+  border:1px solid #ccc;
+  padding:15px;
+  font-size:16px;
+  overflow:auto;
+}
+.toolbar button{
+  margin-right:5px;
+}
 </style>
 </head>
+
 <body>
 <div class="container">
-  <button onclick="goBack()">← Geri</button>
+
+  <!-- ÜST BAR -->
+  <div class="topbar">
+    <button onclick="goBack()">← Geri</button>
+    <button id="editBtn" onclick="enterEditMode()" style="display:none;">✏️ Yazıyı Düzenle</button>
+  </div>
 
   <!-- OKUMA MODU -->
   <div id="viewMode">
     <h1 id="postTitle"></h1>
     <div class="meta" id="postDate"></div>
-    <img id="postCover" class="cover" style="display:none">
     <div id="postContent"></div>
-
-    <div id="adminEdit" style="display:none">
-      <button onclick="enterEditMode()">✏️ Düzenle</button>
-    </div>
   </div>
 
-  <!-- EDIT MODU -->
-  <div id="editMode" style="display:none">
-    <h2>Yazıyı Düzenle</h2>
+  <!-- DÜZENLEME MODU -->
+  <div id="editMode" style="display:none;">
 
-    <input id="editTitle" placeholder="Başlık">
-    <textarea id="editBody" style="height:60vh;"></textarea>
-    <input type="file" id="editCover">
+    <input id="editTitle" placeholder="Başlık"
+      style="width:100%;font-size:24px;padding:10px;margin-bottom:10px;">
 
+    <!-- TOOLBAR -->
+    <div class="toolbar" style="margin-bottom:8px;">
+      <button onclick="cmd('bold')"><b>B</b></button>
+      <button onclick="cmd('italic')"><i>I</i></button>
+      <button onclick="cmd('underline')"><u>U</u></button>
+      <button onclick="cmd('insertUnorderedList')">• Liste</button>
+      <button onclick="cmd('insertOrderedList')">1. Liste</button>
+      <button onclick="addLink()">🔗 Link</button>
+      <button onclick="cmd('formatBlock','h2')">H2</button>
+      <button onclick="cmd('removeFormat')">🧹 Temizle</button>
+    </div>
+
+    <!-- WORD BENZERİ EDİTÖR -->
+    <div id="editBody" contenteditable="true"></div>
+
+    <!-- BUTONLAR -->
     <div style="margin-top:15px;">
       <button onclick="saveEdit(true)">💾 Güncelle & Yayınla</button>
       <button onclick="saveEdit(false)">📄 Taslak</button>
@@ -44,34 +92,21 @@
       <button onclick="cancelEdit()">❌ Vazgeç</button>
     </div>
   </div>
+
 </div>
 
 <script>
 const params = new URLSearchParams(window.location.search);
 const postId = params.get('id');
-const editMode = params.get('edit') === '1';
+
 let state = JSON.parse(localStorage.getItem('blog_state') || '{}');
-let isAdmin = localStorage.getItem('admin')==='1';
+let isAdmin = localStorage.getItem('admin') === '1';
 
-function goBack(){ window.history.back(); }
-
-function enterEditMode(){
-  if(!isAdmin) return;
-
-  document.getElementById('viewMode').style.display = 'none';
-  document.getElementById('editMode').style.display = 'block';
-
-  const p = state.posts.find(x=>x.id===postId);
-  document.getElementById('editTitle').value = p.title;
-  document.getElementById('editBody').value = p.body;
+function goBack(){
+  window.history.back();
 }
 
-function cancelEdit(){
-  document.getElementById('editMode').style.display = 'none';
-  document.getElementById('viewMode').style.display = 'block';
-}
-
-
+/* YAZIYI GÖSTER */
 function renderPost(){
   if(!state.posts) return;
 
@@ -85,50 +120,64 @@ function renderPost(){
   document.getElementById('postDate').textContent = new Date(p.date).toLocaleString();
   document.getElementById('postContent').innerHTML = p.body;
 
-  if(p.cover){
-    const img = document.getElementById('postCover');
-    img.src = p.cover;
-    img.style.display = 'block';
-  }
-
   if(isAdmin){
-    document.getElementById('adminEdit').style.display = 'block';
+    document.getElementById('editBtn').style.display = 'inline-block';
   }
 }
 
-renderPost();
+/* EDIT MODUNA GEÇ */
+function enterEditMode(){
+  if(!isAdmin) return;
 
+  const p = state.posts.find(x=>x.id===postId);
+
+  document.getElementById('viewMode').style.display = 'none';
+  document.getElementById('editMode').style.display = 'block';
+
+  document.getElementById('editTitle').value = p.title;
+  document.getElementById('editBody').innerHTML = p.body;
+}
+
+/* VAZGEÇ */
+function cancelEdit(){
+  document.getElementById('editMode').style.display = 'none';
+  document.getElementById('viewMode').style.display = 'block';
+}
+
+/* WORD KOMUTLARI */
+function cmd(command, value=null){
+  document.execCommand(command, false, value);
+}
+
+function addLink(){
+  const url = prompt("Link adresi:");
+  if(url) document.execCommand("createLink", false, url);
+}
+
+/* KAYDET */
 function saveEdit(published){
   const p = state.posts.find(x=>x.id===postId);
   if(!p) return alert("Yazı bulunamadı");
 
   p.title = document.getElementById('editTitle').value.trim();
-  p.body = document.getElementById('editBody').value.trim();
+  p.body = document.getElementById('editBody').innerHTML.trim();
   p.published = published;
   p.date = new Date().toISOString();
 
-  const coverFile = document.getElementById('editCover').files[0];
-  if(coverFile){
-    const fr = new FileReader();
-    fr.onload = ()=>{
-      p.cover = fr.result;
-      localStorage.setItem('blog_state', JSON.stringify(state));
-      location.reload();
-    };
-    fr.readAsDataURL(coverFile);
-  } else {
-    localStorage.setItem('blog_state', JSON.stringify(state));
-    location.reload();
-  }
+  localStorage.setItem('blog_state', JSON.stringify(state));
+  location.reload();
 }
 
+/* SİL */
 function deletePost(){
   if(!confirm("Bu yazı silinsin mi?")) return;
+
   state.posts = state.posts.filter(x=>x.id!==postId);
   localStorage.setItem('blog_state', JSON.stringify(state));
   window.location.href = "posts.html";
 }
 
+renderPost();
 </script>
 </body>
 </html>
