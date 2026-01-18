@@ -68,6 +68,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
   
 <script>
+const editPost = JSON.parse(localStorage.getItem('editPost') || 'null');
 let state = JSON.parse(localStorage.getItem('blog_state')||'{}');
 let isAdmin = true;
 localStorage.setItem('admin','1');
@@ -113,6 +114,17 @@ function renderAdminList(){
 if(!state.posts) state.posts = [];
 if(!state.siteMeta) state.siteMeta = {};
 renderAdminList();
+if (editPost) {
+  document.getElementById('postTitle').value = editPost.title || '';
+  document.getElementById('postExcerpt').value = editPost.excerpt || '';
+  document.getElementById('postBody').value = editPost.body || '';
+
+  // Kullanıcıya görsel ipucu
+  document.querySelector('h2').innerText = 'Yazıyı Düzenle';
+
+  // Taslak / yayın bilgisi
+  window.__editingPostId = editPost.id;
+}
 
 
 function savePost(published){
@@ -126,6 +138,34 @@ function savePost(published){
     return;
   }
 
+  // 🧠 EDIT MODE
+  if (window.__editingPostId) {
+    const post = state.posts.find(p => p.id === window.__editingPostId);
+    if (!post) return alert("Yazı bulunamadı");
+
+    post.title = title;
+    post.excerpt = excerpt;
+    post.body = body;
+    post.published = published;
+    post.date = new Date().toISOString();
+
+    if (coverFile) {
+      fileToDataURL(coverFile).then(data => {
+        post.cover = data;
+        localStorage.setItem('blog_state', JSON.stringify(state));
+        localStorage.removeItem('editPost');
+        window.location.href = "posts.html";
+      });
+    } else {
+      localStorage.setItem('blog_state', JSON.stringify(state));
+      localStorage.removeItem('editPost');
+      window.location.href = "posts.html";
+    }
+
+    return;
+  }
+
+  // 🆕 NEW POST
   const post = {
     id: Date.now().toString(),
     title,
