@@ -34,7 +34,7 @@ function renderPosts(){
     div.innerHTML = `<h3><a href='post.html?id=${p.id}'>${p.title}</a></h3>`+
                     `<div class='meta'>${new Date(p.date).toLocaleString()} ${!p.published?'(Taslak)':''}</div>`;
     if(isAdmin){
-      const btnEdit = document.createElement('button'); btnEdit.textContent='Düzenle'; btnEdit.onclick=()=>{localStorage.setItem('editPost', JSON.stringify(p)); window.location.href='admin-dashboard.html';};
+      const btnEdit = document.createElement('button'); btnEdit.textContent='Düzenle'; btnEdit.onclick=()=>{localStorage.setItem('editPost', JSON.stringify(p)); window.location.href='admin.html';};
       const btnDel = document.createElement('button'); btnDel.textContent='Sil'; btnDel.onclick=()=>{ if(confirm('Silinsin mi?')){ state.posts = state.posts.filter(x=>x.id!==p.id); localStorage.setItem('blog_state', JSON.stringify(state)); renderPosts(); } };
       div.appendChild(btnEdit); div.appendChild(btnDel);
     }
