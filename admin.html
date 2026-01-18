@@ -75,7 +75,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 <script>
 const editPost = JSON.parse(localStorage.getItem('editPost') || 'null');
 let state = JSON.parse(localStorage.getItem('blog_state')||'{}');
-localStorage.setItem('admin','1');
 
 function fileToDataURL(file){ return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(file);});}
 
