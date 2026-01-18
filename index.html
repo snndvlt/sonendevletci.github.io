@@ -22,6 +22,7 @@
   </div>
   <div>
     <button id="adminToggle">Yönetici Girişi</button>
+    <button id="logoutBtn" style="display:none;">Çıkış</button>
   </div>
 </header>
 
@@ -36,6 +37,18 @@
 document.getElementById('adminToggle').addEventListener('click', ()=>{
     window.location.href = 'admin-login.html';
 });
+const isAdmin = localStorage.getItem('admin') === '1';
+
+if(isAdmin){
+  document.getElementById('logoutBtn').style.display = 'inline';
+}
+
+document.getElementById('logoutBtn').onclick = () => {
+  localStorage.removeItem('admin');
+  alert('Çıkış yapıldı');
+  location.reload();
+};
+
 </script>
 </body>
 </html>
