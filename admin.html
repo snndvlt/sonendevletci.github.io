@@ -48,10 +48,15 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
   </div>
 
   <div class="card">
-    <h2>Dosya/Yayın Yükle</h2>
+    <h2>Dosya Yükle</h2>
     <label>Dosya (pdf, docx, md)</label>
     <input type="file" id="fileUpload">
-    <button id="uploadFileBtn">Upload ve Yazı Olarak Ekle</button>
+    <button id="uploadFileBtn">Yazı Olarak Ekle</button>
+
+    <div id="loading" style="display:none; margin-top:10px; color:#555;">
+       PDF işleniyor, lütfen bekleyin...
+    </div>
+
     <hr>
   </div>
   
@@ -158,7 +163,8 @@ document.getElementById('uploadFileBtn').onclick = async () => {
 
   const loadingEl = document.getElementById("loading");
   loadingEl.style.display = "block";
-
+  if (loadingEl) loadingEl.style.display = "none";
+  
   const ext = file.name.split('.').pop().toLowerCase();
   let content = "";
 
